@@ -10,12 +10,13 @@ import "time"
 
 // check_in_payload holds everything the agent reports to the server on each check-in.
 type check_in_payload struct {
-        Hostname    string    `json:"hostname"`
-        LoggedUser  string    `json:"logged_user"`
-        CheckedInAt time.Time `json:"checked_in_at"`
-        CpuPercent  float64   `json:"cpu_percent"`
-        RamPercent  float64   `json:"ram_percent"`
-        DiskPercent float64   `json:"disk_percent"`
+        Hostname      string    `json:"hostname"`
+        LoggedUser    string    `json:"logged_user"`
+        CheckedInAt   time.Time `json:"checked_in_at"`
+        CpuPercent    float64   `json:"cpu_percent"`
+        RamPercent    float64   `json:"ram_percent"`
+        DiskPercent   float64   `json:"disk_percent"`
+        UptimeSeconds uint64    `json:"uptime_seconds"`
 }
 
 // build_payload collects live system info and returns a populated check_in_payload.
@@ -50,14 +51,21 @@ func build_payload() (check_in_payload, error) {
                 return check_in_payload{}, err
         }
 
+        // Get seconds since last boot.
+        uptime_seconds, err := get_uptime()
+        if err != nil {
+                return check_in_payload{}, err
+        }
+
         // Stamp the current UTC time so the server knows when this check-in was built.
         return check_in_payload{
-                Hostname:    hostname,
-                LoggedUser:  logged_user,
-                CheckedInAt: time.Now().UTC(),
-                CpuPercent:  cpu_percent,
-                RamPercent:  ram_percent,
-                DiskPercent: disk_percent,
+                Hostname:      hostname,
+                LoggedUser:    logged_user,
+                CheckedInAt:   time.Now().UTC(),
+                CpuPercent:    cpu_percent,
+                RamPercent:    ram_percent,
+                DiskPercent:   disk_percent,
+                UptimeSeconds: uptime_seconds,
         }, nil
 }
 

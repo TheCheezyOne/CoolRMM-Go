@@ -79,6 +79,20 @@ func Test_get_disk_percent(t *testing.T) {
         }
 }
 
+// Test_get_uptime confirms uptime is readable and non-zero.
+func Test_get_uptime(t *testing.T) {
+        seconds, err := get_uptime()
+
+        if err != nil {
+                t.Fatalf("get_uptime() returned error: %v", err)
+        }
+
+        // A machine that's been up for 0 seconds is not a machine that's running.
+        if seconds == 0 {
+                t.Errorf("get_uptime() returned 0 — expected a running system to have uptime > 0")
+        }
+}
+
 /*
         To run these tests:
           go test ./agent/...

@@ -15,6 +15,7 @@ import (
 
         "github.com/shirou/gopsutil/v3/cpu"
         "github.com/shirou/gopsutil/v3/disk"
+        "github.com/shirou/gopsutil/v3/host"
         "github.com/shirou/gopsutil/v3/mem"
 )
 
@@ -65,6 +66,15 @@ func get_ram_percent() (float64, error) {
                 return 0, fmt.Errorf("could not read ram usage: %v", err)
         }
         return stat.UsedPercent, nil
+}
+
+// get_uptime returns the number of seconds the machine has been running since last boot.
+func get_uptime() (uint64, error) {
+        seconds, err := host.Uptime()
+        if err != nil {
+                return 0, fmt.Errorf("could not read uptime: %v", err)
+        }
+        return seconds, nil
 }
 
 // get_disk_percent returns the usage percentage for the primary disk (0–100).
