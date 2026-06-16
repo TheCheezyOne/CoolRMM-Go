@@ -53,6 +53,32 @@ func Test_get_cpu_percent(t *testing.T) {
         }
 }
 
+// Test_get_ram_percent confirms RAM usage is readable and within a valid range.
+func Test_get_ram_percent(t *testing.T) {
+        percent, err := get_ram_percent()
+
+        if err != nil {
+                t.Fatalf("get_ram_percent() returned error: %v", err)
+        }
+
+        if percent < 0 || percent > 100 {
+                t.Errorf("get_ram_percent() returned out-of-range value: %v", percent)
+        }
+}
+
+// Test_get_disk_percent confirms disk usage is readable and within a valid range.
+func Test_get_disk_percent(t *testing.T) {
+        percent, err := get_disk_percent()
+
+        if err != nil {
+                t.Fatalf("get_disk_percent() returned error: %v", err)
+        }
+
+        if percent < 0 || percent > 100 {
+                t.Errorf("get_disk_percent() returned out-of-range value: %v", percent)
+        }
+}
+
 /*
         To run these tests:
           go test ./agent/...

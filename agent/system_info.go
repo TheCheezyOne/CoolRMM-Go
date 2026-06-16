@@ -10,9 +10,12 @@ import (
         "fmt"
         "os"
         "os/user"
+        "runtime"
         "time"
 
         "github.com/shirou/gopsutil/v3/cpu"
+        "github.com/shirou/gopsutil/v3/disk"
+        "github.com/shirou/gopsutil/v3/mem"
 )
 
 // get_hostname returns the machine's hostname or an error if it can't be read.
@@ -53,6 +56,29 @@ func get_cpu_percent() (float64, error) {
         }
 
         return percents[0], nil
+}
+
+// get_ram_percent returns the percentage of RAM currently in use (0–100).
+func get_ram_percent() (float64, error) {
+        stat, err := mem.VirtualMemory()
+        if err != nil {
+                return 0, fmt.Errorf("could not read ram usage: %v", err)
+        }
+        return stat.UsedPercent, nil
+}
+
+// get_disk_percent returns the usage percentage for the primary disk (0–100).
+// Uses C:\ on Windows and / on Linux for cross-platform test compatibility.
+func get_disk_percent() (float64, error) {
+        path := "C:\\"
+        if runtime.GOOS != "windows" {
+                path = "/"
+        }
+        usage, err := disk.Usage(path)
+        if err != nil {
+                return 0, fmt.Errorf("could not read disk usage for %s: %v", path, err)
+        }
+        return usage.UsedPercent, nil
 }
 
 /*

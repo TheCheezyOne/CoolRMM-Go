@@ -14,6 +14,8 @@ type check_in_payload struct {
         LoggedUser  string    `json:"logged_user"`
         CheckedInAt time.Time `json:"checked_in_at"`
         CpuPercent  float64   `json:"cpu_percent"`
+        RamPercent  float64   `json:"ram_percent"`
+        DiskPercent float64   `json:"disk_percent"`
 }
 
 // build_payload collects live system info and returns a populated check_in_payload.
@@ -36,12 +38,26 @@ func build_payload() (check_in_payload, error) {
                 return check_in_payload{}, err
         }
 
+        // Get current RAM usage.
+        ram_percent, err := get_ram_percent()
+        if err != nil {
+                return check_in_payload{}, err
+        }
+
+        // Get primary disk usage.
+        disk_percent, err := get_disk_percent()
+        if err != nil {
+                return check_in_payload{}, err
+        }
+
         // Stamp the current UTC time so the server knows when this check-in was built.
         return check_in_payload{
                 Hostname:    hostname,
                 LoggedUser:  logged_user,
                 CheckedInAt: time.Now().UTC(),
                 CpuPercent:  cpu_percent,
+                RamPercent:  ram_percent,
+                DiskPercent: disk_percent,
         }, nil
 }
 

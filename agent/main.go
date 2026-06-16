@@ -14,7 +14,7 @@ import (
 )
 
 // version tracks the current release of the agent binary.
-const version = "v0.6.0"
+const version = "v0.7.0"
 
 // check_in_interval is how often the agent phones home.
 const check_in_interval = 60 * time.Second
