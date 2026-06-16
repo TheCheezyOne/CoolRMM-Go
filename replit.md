@@ -173,3 +173,5 @@ Server
     server v0.0.0: (no standalone scaffold — server started at first feature)
     server v0.1.0: Minimal HTTP server — POST /checkin receives agent payload, prints to console, responds 200 OK
     server v0.2.0: Persists check-ins to SQLite DB — open_db(), create_schema(), insert_checkin()
+    server v0.3.0: cpu_percent added to payload, DB schema, and console output — existing DBs auto-migrated via ALTER TABLE
+
