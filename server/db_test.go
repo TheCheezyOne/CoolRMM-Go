@@ -31,7 +31,7 @@ func Test_insert_checkin(t *testing.T) {
         defer db.Close()
 
         // Insert a check-in and confirm no error is returned.
-        err = insert_checkin(db, "test-host", "test-user", time.Now().UTC(), 55.2)
+        err = insert_checkin(db, "test-host", "test-user", time.Now().UTC(), 55.2, 70.1, 42.0)
         if err != nil {
                 t.Fatalf("insert_checkin() returned error: %v", err)
         }

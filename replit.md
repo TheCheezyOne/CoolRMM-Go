@@ -147,6 +147,7 @@ If you edit `replit.md` locally and push, paste the relevant section into chat a
 - First successful live end-to-end test on Windows 11 — agent phoning home to server, check-ins logging every 60 seconds ✓ `061426@1409`
 - CPU usage % confirmed reporting live from Windows 11 agent to server console and database ✓ `061626@1053`
 - Web dashboard live — dark theme, device list with status dots, cpu%, auto-refresh ✓ `061626@1101`
+- Multi-device confirmed — two endpoints reporting live to dashboard simultaneously ✓ `061626@1151`
 
 ### Version Log
 
@@ -158,6 +159,7 @@ If you edit `replit.md` locally and push, paste the relevant section into chat a
 - agent v0.4.0: Runs a 60-second check-in loop — sends immediately on startup, logs errors without dying
 - agent v0.5.0: server_url loaded from coolrmm.conf at startup — no more hardcoded localhost
 - agent v0.6.0: CPU usage % added to payload via gopsutil (500ms sample, combined across all cores)
+- agent v0.7.0: RAM usage % and disk usage % (C:\) added to payload
 
 **Server**
 - server v0.0.0: (no standalone scaffold — server started at first feature)
@@ -165,3 +167,4 @@ If you edit `replit.md` locally and push, paste the relevant section into chat a
 - server v0.2.0: Persists check-ins to SQLite DB — open_db(), create_schema(), insert_checkin()
 - server v0.3.0: cpu_percent added to payload, DB schema, and console output — existing DBs auto-migrated via ALTER TABLE
 - server v0.4.0: Web dashboard — GET / serves dark theme HTML page, GET /devices returns device JSON; status dots green/yellow/red by check-in age
+- server v0.5.0: RAM and Disk (C:\) columns added to dashboard and database

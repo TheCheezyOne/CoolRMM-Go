@@ -47,29 +47,37 @@ func create_schema(db *sql.DB) error {
                 hostname      TEXT NOT NULL,
                 logged_user   TEXT NOT NULL,
                 checked_in_at DATETIME NOT NULL,
-                cpu_percent   REAL NOT NULL DEFAULT 0
+                cpu_percent   REAL NOT NULL DEFAULT 0,
+                ram_percent   REAL NOT NULL DEFAULT 0,
+                disk_percent  REAL NOT NULL DEFAULT 0
         );`
 
         if _, err := db.Exec(create_query); err != nil {
                 return err
         }
 
-        // Migrate existing DBs — add cpu_percent if it isn't there yet.
-        // SQLite errors if the column already exists; ignore that specific case.
-        _, err := db.Exec(`ALTER TABLE checkins ADD COLUMN cpu_percent REAL NOT NULL DEFAULT 0;`)
-        if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
-                return fmt.Errorf("failed to migrate schema: %w", err)
+        // Migrate existing DBs — add any missing columns, ignore if already present.
+        migrations := []string{
+                `ALTER TABLE checkins ADD COLUMN cpu_percent  REAL NOT NULL DEFAULT 0;`,
+                `ALTER TABLE checkins ADD COLUMN ram_percent  REAL NOT NULL DEFAULT 0;`,
+                `ALTER TABLE checkins ADD COLUMN disk_percent REAL NOT NULL DEFAULT 0;`,
+        }
+        for _, m := range migrations {
+                _, err := db.Exec(m)
+                if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
+                        return fmt.Errorf("failed to migrate schema: %w", err)
+                }
         }
 
         return nil
 }
 
 // insert_checkin writes a single check-in record to the database.
-func insert_checkin(db *sql.DB, hostname, logged_user string, checked_in_at time.Time, cpu_percent float64) error {
-        query := `INSERT INTO checkins (hostname, logged_user, checked_in_at, cpu_percent) VALUES (?, ?, ?, ?);`
+func insert_checkin(db *sql.DB, hostname, logged_user string, checked_in_at time.Time, cpu_percent, ram_percent, disk_percent float64) error {
+        query := `INSERT INTO checkins (hostname, logged_user, checked_in_at, cpu_percent, ram_percent, disk_percent) VALUES (?, ?, ?, ?, ?, ?);`
 
         // Store time as RFC3339 string — avoids ambiguous formats on read-back.
-        _, err := db.Exec(query, hostname, logged_user, checked_in_at.UTC().Format(time.RFC3339), cpu_percent)
+        _, err := db.Exec(query, hostname, logged_user, checked_in_at.UTC().Format(time.RFC3339), cpu_percent, ram_percent, disk_percent)
         if err != nil {
                 return fmt.Errorf("failed to insert check-in: %w", err)
         }

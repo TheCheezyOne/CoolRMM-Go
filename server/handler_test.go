@@ -45,6 +45,8 @@ func Test_make_checkin_handler_ok(t *testing.T) {
                 LoggedUser:  "test-user",
                 CheckedInAt: time.Now().UTC(),
                 CpuPercent:  42.5,
+                RamPercent:  61.0,
+                DiskPercent: 38.2,
         }
 
         body, err := json.Marshal(payload)

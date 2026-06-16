@@ -40,6 +40,8 @@
                 <th>Hostname</th>
                 <th>User</th>
                 <th>CPU</th>
+                <th>RAM</th>
+                <th>Disk (C:)</th>
                 <th>Last Seen</th>
             </tr>
         </thead>
@@ -68,6 +70,8 @@
                             <td>${d.hostname}</td>
                             <td>${d.logged_user}</td>
                             <td>${d.cpu_percent.toFixed(1)}%</td>
+                            <td>${d.ram_percent.toFixed(1)}%</td>
+                            <td>${d.disk_percent.toFixed(1)}%</td>
                             <td class="dim">${ago(d.last_seen)}</td>
                         </tr>`;
                     }).join('');

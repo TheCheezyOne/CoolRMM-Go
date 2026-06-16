@@ -21,6 +21,8 @@ type check_in_payload struct {
         LoggedUser  string    `json:"logged_user"`
         CheckedInAt time.Time `json:"checked_in_at"`
         CpuPercent  float64   `json:"cpu_percent"`
+        RamPercent  float64   `json:"ram_percent"`
+        DiskPercent float64   `json:"disk_percent"`
 }
 
 // make_checkin_handler returns an http.HandlerFunc with the DB wired in via closure.
@@ -41,17 +43,19 @@ func make_checkin_handler(db *sql.DB) http.HandlerFunc {
                 }
 
                 // Persist the check-in to the database.
-                if err := insert_checkin(db, payload.Hostname, payload.LoggedUser, payload.CheckedInAt, payload.CpuPercent); err != nil {
+                if err := insert_checkin(db, payload.Hostname, payload.LoggedUser, payload.CheckedInAt, payload.CpuPercent, payload.RamPercent, payload.DiskPercent); err != nil {
                         log.Printf("failed to save check-in: %v", err)
                         http.Error(w, "internal server error", http.StatusInternalServerError)
                         return
                 }
 
                 // Log it to the console so we can watch check-ins arrive in real time.
-                fmt.Printf("[check-in] host=%s user=%s cpu=%.1f%% time=%s\n",
+                fmt.Printf("[check-in] host=%s user=%s cpu=%.1f%% ram=%.1f%% disk=%.1f%% time=%s\n",
                         payload.Hostname,
                         payload.LoggedUser,
                         payload.CpuPercent,
+                        payload.RamPercent,
+                        payload.DiskPercent,
                         payload.CheckedInAt.Format(time.RFC3339),
                 )
 

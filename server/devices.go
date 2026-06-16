@@ -35,11 +35,13 @@ func parse_sqlite_time(s string) (time.Time, error) {
 // device_status holds the most recent check-in data for a single device,
 // plus its computed dot color.
 type device_status struct {
-        Hostname   string    `json:"hostname"`
-        LoggedUser string    `json:"logged_user"`
-        CpuPercent float64   `json:"cpu_percent"`
-        LastSeen   time.Time `json:"last_seen"`
-        Status     string    `json:"status"` // "green", "yellow", or "red"
+        Hostname    string    `json:"hostname"`
+        LoggedUser  string    `json:"logged_user"`
+        CpuPercent  float64   `json:"cpu_percent"`
+        RamPercent  float64   `json:"ram_percent"`
+        DiskPercent float64   `json:"disk_percent"`
+        LastSeen    time.Time `json:"last_seen"`
+        Status      string    `json:"status"` // "green", "yellow", or "red"
 }
 
 // Status thresholds — time since last check-in before the dot changes color.
@@ -61,7 +63,7 @@ func compute_status(last_seen time.Time) string {
 // get_latest_devices returns the most recent check-in for each unique hostname.
 func get_latest_devices(db *sql.DB) ([]device_status, error) {
         query := `
-        SELECT hostname, logged_user, cpu_percent, MAX(checked_in_at) AS last_seen
+        SELECT hostname, logged_user, cpu_percent, ram_percent, disk_percent, MAX(checked_in_at) AS last_seen
         FROM checkins
         GROUP BY hostname
         ORDER BY hostname;`
@@ -76,7 +78,7 @@ func get_latest_devices(db *sql.DB) ([]device_status, error) {
         for rows.Next() {
                 var d device_status
                 var last_seen_str string
-                if err := rows.Scan(&d.Hostname, &d.LoggedUser, &d.CpuPercent, &last_seen_str); err != nil {
+                if err := rows.Scan(&d.Hostname, &d.LoggedUser, &d.CpuPercent, &d.RamPercent, &d.DiskPercent, &last_seen_str); err != nil {
                         return nil, fmt.Errorf("failed to scan device row: %w", err)
                 }
                 // SQLite returns datetimes as strings — parse it manually.
