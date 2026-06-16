@@ -68,7 +68,8 @@ func create_schema(db *sql.DB) error {
 func insert_checkin(db *sql.DB, hostname, logged_user string, checked_in_at time.Time, cpu_percent float64) error {
         query := `INSERT INTO checkins (hostname, logged_user, checked_in_at, cpu_percent) VALUES (?, ?, ?, ?);`
 
-        _, err := db.Exec(query, hostname, logged_user, checked_in_at.UTC(), cpu_percent)
+        // Store time as RFC3339 string — avoids ambiguous formats on read-back.
+        _, err := db.Exec(query, hostname, logged_user, checked_in_at.UTC().Format(time.RFC3339), cpu_percent)
         if err != nil {
                 return fmt.Errorf("failed to insert check-in: %w", err)
         }

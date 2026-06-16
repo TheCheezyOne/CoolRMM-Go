@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoolRMM</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #111; color: #d0d0d0; font-family: Consolas, 'Courier New', monospace; padding: 24px; }
+        h1 { color: #fff; font-size: 1.3rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px; }
+        .status-bar { font-size: 0.82rem; color: #555; margin-bottom: 28px; }
+        .status-bar span { margin-right: 18px; }
+        .g { color: #4caf50; }
+        .y { color: #ffc107; }
+        .r { color: #f44336; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: #444; font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; padding: 4px 14px 8px; border-bottom: 1px solid #222; }
+        td { padding: 9px 14px; border-bottom: 1px solid #1c1c1c; font-size: 0.88rem; }
+        tr:hover td { background: #161616; }
+        .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+        .green { background: #4caf50; box-shadow: 0 0 5px #4caf5088; }
+        .yellow { background: #ffc107; box-shadow: 0 0 5px #ffc10788; }
+        .red { background: #f44336; box-shadow: 0 0 5px #f4433688; }
+        .dim { color: #444; font-size: 0.8rem; }
+        #footer { position: fixed; bottom: 12px; right: 18px; font-size: 0.7rem; color: #2a2a2a; }
+    </style>
+</head>
+<body>
+    <h1>CoolRMM</h1>
+    <div class="status-bar">
+        <span id="total">— devices</span>
+        <span class="g" id="cnt-green">● —</span>
+        <span class="y" id="cnt-yellow">● —</span>
+        <span class="r" id="cnt-red">● —</span>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Hostname</th>
+                <th>User</th>
+                <th>CPU</th>
+                <th>Last Seen</th>
+            </tr>
+        </thead>
+        <tbody id="devices"></tbody>
+    </table>
+    <div id="footer">—</div>
+    <script>
+        function ago(iso) {
+            const s = Math.floor((Date.now() - new Date(iso)) / 1000);
+            if (s < 60)   return s + 's ago';
+            if (s < 3600) return Math.floor(s / 60) + 'm ago';
+            return Math.floor(s / 3600) + 'h ago';
+        }
+
+        function refresh() {
+            fetch('/devices')
+                .then(r => r.json())
+                .then(data => {
+                    let g = 0, y = 0, r = 0;
+                    const rows = data.map(d => {
+                        if (d.status === 'green')  g++;
+                        else if (d.status === 'yellow') y++;
+                        else r++;
+                        return `<tr>
+                            <td><span class="dot ${d.status}"></span></td>
+                            <td>${d.hostname}</td>
+                            <td>${d.logged_user}</td>
+                            <td>${d.cpu_percent.toFixed(1)}%</td>
+                            <td class="dim">${ago(d.last_seen)}</td>
+                        </tr>`;
+                    }).join('');
+
+                    document.getElementById('devices').innerHTML = rows;
+                    document.getElementById('total').textContent = data.length + ' device' + (data.length !== 1 ? 's' : '');
+                    document.getElementById('cnt-green').textContent  = '● ' + g;
+                    document.getElementById('cnt-yellow').textContent = '● ' + y;
+                    document.getElementById('cnt-red').textContent    = '● ' + r;
+                    document.getElementById('footer').textContent = 'refreshed ' + new Date().toLocaleTimeString();
+                })
+                .catch(() => {
+                    document.getElementById('footer').textContent = 'refresh failed';
+                });
+        }
+
+        refresh();
+        setInterval(refresh, 30000);
+    </script>
+</body>
+</html>

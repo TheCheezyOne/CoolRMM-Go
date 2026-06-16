@@ -12,7 +12,7 @@ import (
 )
 
 // version tracks the current release of the server binary.
-const version = "v0.3.0"
+const version = "v0.4.0"
 
 // listen_addr is the address and port the server binds to.
 const listen_addr = ":8080"
@@ -32,8 +32,10 @@ func main() {
 
         fmt.Printf("Database ready: %s\n", db_path)
 
-        // Register the check-in route with the DB wired in.
+        // Register all routes with the DB wired in where needed.
+        http.HandleFunc("/", make_dashboard_handler())
         http.HandleFunc("/checkin", make_checkin_handler(db))
+        http.HandleFunc("/devices", make_devices_handler(db))
 
         // Start the server — log.Fatal so any startup error prints and exits cleanly.
         log.Fatal(http.ListenAndServe(listen_addr, nil))
