@@ -12,7 +12,7 @@ import (
 )
 
 // version tracks the current release of the server binary.
-const version = "v0.5.0"
+const version = "v0.6.0"
 
 // listen_addr is the address and port the server binds to.
 const listen_addr = ":8080"

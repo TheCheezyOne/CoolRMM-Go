@@ -58,10 +58,10 @@ func Test_get_latest_devices_dedup(t *testing.T) {
         old_time := time.Now().UTC().Add(-5 * time.Minute)
         new_time := time.Now().UTC()
 
-        if err := insert_checkin(db, "host-a", "user-a", old_time, 10.0, 50.0, 30.0); err != nil {
+        if err := insert_checkin(db, "host-a", "user-a", old_time, 10.0, 50.0, 30.0, 1800); err != nil {
                 t.Fatalf("insert_checkin() failed: %v", err)
         }
-        if err := insert_checkin(db, "host-a", "user-a", new_time, 20.0, 60.0, 35.0); err != nil {
+        if err := insert_checkin(db, "host-a", "user-a", new_time, 20.0, 60.0, 35.0, 3600); err != nil {
                 t.Fatalf("insert_checkin() failed: %v", err)
         }
 

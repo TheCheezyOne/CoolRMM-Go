@@ -39,6 +39,7 @@
                 <th></th>
                 <th>Hostname</th>
                 <th>User</th>
+                <th>Uptime</th>
                 <th>CPU</th>
                 <th>RAM</th>
                 <th>Disk (C:)</th>
@@ -49,6 +50,15 @@
     </table>
     <div id="footer">—</div>
     <script>
+        function fmt_uptime(s) {
+            const d = Math.floor(s / 86400);
+            const h = Math.floor((s % 86400) / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            if (d > 0) return d + 'd ' + h + 'h';
+            if (h > 0) return h + 'h ' + m + 'm';
+            return m + 'm';
+        }
+
         function ago(iso) {
             const s = Math.floor((Date.now() - new Date(iso)) / 1000);
             if (s < 60)   return s + 's ago';
@@ -69,6 +79,7 @@
                             <td><span class="dot ${d.status}"></span></td>
                             <td>${d.hostname}</td>
                             <td>${d.logged_user}</td>
+                            <td>${fmt_uptime(d.uptime_seconds)}</td>
                             <td>${d.cpu_percent.toFixed(1)}%</td>
                             <td>${d.ram_percent.toFixed(1)}%</td>
                             <td>${d.disk_percent.toFixed(1)}%</td>

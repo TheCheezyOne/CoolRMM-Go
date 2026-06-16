@@ -43,13 +43,14 @@ func create_schema(db *sql.DB) error {
         // Create the base table — safe to run on an existing DB.
         create_query := `
         CREATE TABLE IF NOT EXISTS checkins (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                hostname      TEXT NOT NULL,
-                logged_user   TEXT NOT NULL,
-                checked_in_at DATETIME NOT NULL,
-                cpu_percent   REAL NOT NULL DEFAULT 0,
-                ram_percent   REAL NOT NULL DEFAULT 0,
-                disk_percent  REAL NOT NULL DEFAULT 0
+                id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                hostname       TEXT NOT NULL,
+                logged_user    TEXT NOT NULL,
+                checked_in_at  DATETIME NOT NULL,
+                cpu_percent    REAL NOT NULL DEFAULT 0,
+                ram_percent    REAL NOT NULL DEFAULT 0,
+                disk_percent   REAL NOT NULL DEFAULT 0,
+                uptime_seconds INTEGER NOT NULL DEFAULT 0
         );`
 
         if _, err := db.Exec(create_query); err != nil {
@@ -58,9 +59,10 @@ func create_schema(db *sql.DB) error {
 
         // Migrate existing DBs — add any missing columns, ignore if already present.
         migrations := []string{
-                `ALTER TABLE checkins ADD COLUMN cpu_percent  REAL NOT NULL DEFAULT 0;`,
-                `ALTER TABLE checkins ADD COLUMN ram_percent  REAL NOT NULL DEFAULT 0;`,
-                `ALTER TABLE checkins ADD COLUMN disk_percent REAL NOT NULL DEFAULT 0;`,
+                `ALTER TABLE checkins ADD COLUMN cpu_percent    REAL    NOT NULL DEFAULT 0;`,
+                `ALTER TABLE checkins ADD COLUMN ram_percent    REAL    NOT NULL DEFAULT 0;`,
+                `ALTER TABLE checkins ADD COLUMN disk_percent   REAL    NOT NULL DEFAULT 0;`,
+                `ALTER TABLE checkins ADD COLUMN uptime_seconds INTEGER NOT NULL DEFAULT 0;`,
         }
         for _, m := range migrations {
                 _, err := db.Exec(m)
@@ -73,11 +75,11 @@ func create_schema(db *sql.DB) error {
 }
 
 // insert_checkin writes a single check-in record to the database.
-func insert_checkin(db *sql.DB, hostname, logged_user string, checked_in_at time.Time, cpu_percent, ram_percent, disk_percent float64) error {
-        query := `INSERT INTO checkins (hostname, logged_user, checked_in_at, cpu_percent, ram_percent, disk_percent) VALUES (?, ?, ?, ?, ?, ?);`
+func insert_checkin(db *sql.DB, hostname, logged_user string, checked_in_at time.Time, cpu_percent, ram_percent, disk_percent float64, uptime_seconds uint64) error {
+        query := `INSERT INTO checkins (hostname, logged_user, checked_in_at, cpu_percent, ram_percent, disk_percent, uptime_seconds) VALUES (?, ?, ?, ?, ?, ?, ?);`
 
         // Store time as RFC3339 string — avoids ambiguous formats on read-back.
-        _, err := db.Exec(query, hostname, logged_user, checked_in_at.UTC().Format(time.RFC3339), cpu_percent, ram_percent, disk_percent)
+        _, err := db.Exec(query, hostname, logged_user, checked_in_at.UTC().Format(time.RFC3339), cpu_percent, ram_percent, disk_percent, uptime_seconds)
         if err != nil {
                 return fmt.Errorf("failed to insert check-in: %w", err)
         }

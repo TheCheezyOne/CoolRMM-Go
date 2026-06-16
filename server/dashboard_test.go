@@ -51,7 +51,7 @@ func Test_make_devices_handler_ok(t *testing.T) {
         defer db.Close()
 
         // Insert one device so the response isn't empty.
-        if err := insert_checkin(db, "test-host", "test-user", time.Now().UTC(), 33.3, 55.0, 40.0); err != nil {
+        if err := insert_checkin(db, "test-host", "test-user", time.Now().UTC(), 33.3, 55.0, 40.0, 5400); err != nil {
                 t.Fatalf("insert_checkin() failed: %v", err)
         }
 
