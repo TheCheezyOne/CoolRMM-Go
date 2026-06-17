@@ -14,10 +14,13 @@ import (
 )
 
 // version tracks the current release of the agent binary.
-const version = "v0.9.0"
+const version = "v1.0.0"
 
 // check_in_interval is how often the agent phones home.
 const check_in_interval = 60 * time.Second
+
+// command_poll_interval is how often the agent checks for pending remote commands.
+const command_poll_interval = 5 * time.Second
 
 func main() {
         fmt.Printf("CoolRMM Agent %s starting...\n", version)
@@ -30,10 +33,21 @@ func main() {
 
         fmt.Printf("Phoning home to %s every %s.\n", cfg.ServerURL, check_in_interval)
 
+        // Start command poll loop in a goroutine — runs independently of check-in.
+        go func() {
+                poll_ticker := time.NewTicker(command_poll_interval)
+                defer poll_ticker.Stop()
+                for range poll_ticker.C {
+                        if err := poll_commands(cfg.ServerURL, cfg.ApiKey); err != nil {
+                                log.Printf("command poll failed: %v", err)
+                        }
+                }
+        }()
+
         // Send the first check-in immediately — don't wait for the first tick.
         do_checkin(cfg.ServerURL, cfg.ApiKey)
 
-        // Start the ticker and check in on every tick.
+        // Start the check-in ticker — blocks the main goroutine forever.
         ticker := time.NewTicker(check_in_interval)
         defer ticker.Stop()
 

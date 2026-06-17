@@ -159,6 +159,7 @@ If you edit `replit.md` locally and push, paste the relevant section into chat a
 - agent v0.7.0: RAM usage % and disk usage % (C:\) added to payload
 - agent v0.8.0: Uptime (seconds since last boot) added to payload
 - agent v0.9.0: Shared secret auth — api_key added to config and sent as Bearer token on every check-in
+- agent v1.0.0: Remote shell — polls server every 5s for pending commands, executes via system shell, posts output back
 
 **Server**
 - server v0.0.0: (no standalone scaffold — server started at first feature)
@@ -169,3 +170,4 @@ If you edit `replit.md` locally and push, paste the relevant section into chat a
 - server v0.5.0: RAM and Disk (C:\) columns added to dashboard and database
 - server v0.6.0: Uptime column added to dashboard and database
 - server v0.7.0: Shared secret auth — require_auth() middleware protects /checkin; server reads api_key from coolrmm-server.conf
+- server v0.8.0: Remote shell — commands table, 5 new endpoints, shell.html terminal UI, CLI button on dashboard
