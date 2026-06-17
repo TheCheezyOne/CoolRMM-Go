@@ -12,7 +12,7 @@ import (
 )
 
 // version tracks the current release of the server binary.
-const version = "v0.7.0"
+const version = "v0.8.0"
 
 // listen_addr is the address and port the server binds to.
 const listen_addr = ":8080"
@@ -39,12 +39,17 @@ func main() {
 
         fmt.Printf("Database ready: %s\n", db_path)
 
-        // Dashboard and device list are read-only — no auth required yet.
+        // Browser-facing endpoints — no Bearer auth (internal network only).
         http.HandleFunc("/", make_dashboard_handler())
         http.HandleFunc("/devices", make_devices_handler(db))
+        http.HandleFunc("/shell", make_shell_handler())
+        http.HandleFunc("/commands", make_submit_command_handler(db))
+        http.HandleFunc("/command_output", make_command_output_handler(db))
 
-        // Agent-facing endpoints are protected by the shared api_key.
+        // Agent-facing endpoints — protected by the shared api_key.
         http.HandleFunc("/checkin", require_auth(cfg.ApiKey, make_checkin_handler(db)))
+        http.HandleFunc("/commands/pending", require_auth(cfg.ApiKey, make_pending_command_handler(db)))
+        http.HandleFunc("/command_result", require_auth(cfg.ApiKey, make_command_result_handler(db)))
 
         // Start the server — log.Fatal so any startup error prints and exits cleanly.
         log.Fatal(http.ListenAndServe(listen_addr, nil))

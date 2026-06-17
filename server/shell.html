@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoolRMM Shell</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #111; color: #d0d0d0; font-family: Consolas, 'Courier New', monospace; height: 100vh; display: flex; flex-direction: column; }
+        #header { padding: 16px 24px; border-bottom: 1px solid #1e1e1e; }
+        #header h1 { color: #fff; font-size: 1rem; letter-spacing: 3px; text-transform: uppercase; }
+        #header .sub { color: #444; font-size: 0.8rem; margin-top: 4px; }
+        #output { flex: 1; overflow-y: auto; padding: 16px 24px; }
+        .entry { margin-bottom: 14px; }
+        .cmd-line { color: #555; font-size: 0.88rem; }
+        .cmd-line span { color: #ccc; }
+        .out-text { color: #4caf50; white-space: pre-wrap; word-break: break-all; font-size: 0.85rem; margin-top: 4px; }
+        .err-text { color: #f44336; white-space: pre-wrap; word-break: break-all; font-size: 0.85rem; margin-top: 4px; }
+        .waiting { color: #444; font-size: 0.8rem; margin-top: 4px; }
+        #input-area { padding: 12px 24px; border-top: 1px solid #1e1e1e; display: flex; gap: 8px; align-items: center; }
+        #cmd-input { flex: 1; background: #161616; border: 1px solid #2a2a2a; color: #fff; padding: 8px 12px; font-family: Consolas, 'Courier New', monospace; font-size: 0.88rem; outline: none; }
+        #cmd-input:focus { border-color: #3a3a3a; }
+        #cmd-input:disabled { opacity: 0.4; }
+        #run-btn { background: #1a1a1a; border: 1px solid #2a2a2a; color: #888; padding: 8px 18px; cursor: pointer; font-family: Consolas, 'Courier New', monospace; font-size: 0.82rem; letter-spacing: 1px; text-transform: uppercase; }
+        #run-btn:hover:not(:disabled) { background: #222; color: #ccc; border-color: #3a3a3a; }
+        #run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>CoolRMM</h1>
+        <div class="sub" id="shell-title">Shell: —</div>
+    </div>
+    <div id="output"></div>
+    <div id="input-area">
+        <input id="cmd-input" type="text" placeholder="enter command..." autocomplete="off" spellcheck="false" />
+        <button id="run-btn">Run</button>
+    </div>
+    <script>
+        const params   = new URLSearchParams(window.location.search);
+        const hostname = params.get('host') || '(unknown)';
+
+        document.getElementById('shell-title').textContent = 'Shell: ' + hostname;
+        document.title = 'Shell — ' + hostname;
+
+        const output_div = document.getElementById('output');
+        const input      = document.getElementById('cmd-input');
+        const btn        = document.getElementById('run-btn');
+
+        function lock()   { input.disabled = true;  btn.disabled = true;  }
+        function unlock() { input.disabled = false; btn.disabled = false; input.focus(); }
+
+        function esc(s) {
+            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        function append_pending(cmd) {
+            const entry   = document.createElement('div');
+            entry.className = 'entry';
+            entry.innerHTML = `<div class="cmd-line">&gt; <span>${esc(cmd)}</span></div><div class="waiting">running...</div>`;
+            output_div.appendChild(entry);
+            output_div.scrollTop = output_div.scrollHeight;
+            return entry;
+        }
+
+        function resolve(entry, cmd, output, exit_code) {
+            const out_class = exit_code !== 0 ? 'err-text' : 'out-text';
+            const out_html  = output ? `<div class="${out_class}">${esc(output)}</div>` : '';
+            entry.innerHTML = `<div class="cmd-line">&gt; <span>${esc(cmd)}</span></div>${out_html}`;
+            output_div.scrollTop = output_div.scrollHeight;
+        }
+
+        async function run() {
+            const cmd = input.value.trim();
+            if (!cmd) return;
+            input.value = '';
+            lock();
+
+            const entry = append_pending(cmd);
+
+            // Submit the command to the server.
+            let id;
+            try {
+                const res = await fetch('/commands', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hostname, command: cmd })
+                });
+                if (!res.ok) throw new Error('submit failed: ' + res.status);
+                const data = await res.json();
+                id = data.id;
+            } catch (e) {
+                resolve(entry, cmd, 'error: ' + e.message, 1);
+                unlock();
+                return;
+            }
+
+            // Poll every second until the agent posts the result back.
+            const poll = setInterval(async () => {
+                try {
+                    const res = await fetch('/command_output?id=' + id);
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (data.status === 'complete') {
+                        clearInterval(poll);
+                        resolve(entry, cmd, data.output, data.exit_code);
+                        unlock();
+                    }
+                } catch (_) { /* keep polling */ }
+            }, 1000);
+        }
+
+        btn.addEventListener('click', run);
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') run(); });
+        unlock();
+    </script>
+</body>
+</html>

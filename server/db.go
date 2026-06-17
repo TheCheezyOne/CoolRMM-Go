@@ -34,6 +34,11 @@ func open_db(path string) (*sql.DB, error) {
                 return nil, fmt.Errorf("failed to create schema: %w", err)
         }
 
+        // Create the commands table for remote shell support.
+        if err := create_commands_schema(db); err != nil {
+                return nil, fmt.Errorf("failed to create commands schema: %w", err)
+        }
+
         return db, nil
 }
 
