@@ -28,7 +28,7 @@ func load_config() (agent_config, error) {
         if err != nil {
                 return agent_config{}, fmt.Errorf("could not determine executable path: %w", err)
         }
-        conf_path := filepath.Join(filepath.Dir(exe_path), "coolrmm.conf")
+        conf_path := filepath.Join(filepath.Dir(exe_path), "coolrmm-agent.conf")
 
         return parse_config_file(conf_path)
 }
@@ -94,11 +94,11 @@ func parse_config_file(conf_path string) (agent_config, error) {
           GOOS=windows GOARCH=amd64 go build -o coolrmm-agent.exe ./agent
 
         Deployment (per machine):
-          1. Copy coolrmm.conf.example → coolrmm.conf in the same folder as coolrmm-agent.exe
-          2. Edit coolrmm.conf — set server_url to the real server IP and port
+          1. Copy coolrmm-agent.conf.example → coolrmm-agent.conf in the same folder as coolrmm-agent.exe
+          2. Edit coolrmm-agent.conf — set server_url and api_key
           3. Run coolrmm-agent.exe
 
-        coolrmm.conf format (# for comments):
+        coolrmm-agent.conf format (# for comments):
           # CoolRMM agent config
           server_url=http://192.168.1.100:8080
           api_key=your_secret_here

@@ -1,6 +1,6 @@
 # CoolRMM Agent Configuration
-# Copy this file to coolrmm.conf and edit before running the agent.
-# coolrmm.conf must sit in the same directory as coolrmm-agent.exe.
+# Copy this file to coolrmm-agent.conf and edit before running the agent.
+# coolrmm-agent.conf must sit in the same directory as coolrmm-agent.exe.
 
 # server_url — the full address of your CoolRMM server.
 # Replace with your server's actual IP address and port.

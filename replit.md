@@ -131,8 +131,8 @@ If you edit `replit.md` locally and push, paste the relevant section into chat a
 ## Notes
 
 ### Agent Deployment (per machine)
-1. Copy `coolrmm.conf.example` → `coolrmm.conf` in the same folder as `coolrmm-agent.exe`
-2. Edit `coolrmm.conf` — set `server_url` to the real server IP and port
+1. Copy `coolrmm-agent.conf.example` → `coolrmm-agent.conf` in the same folder as `coolrmm-agent.exe`
+2. Edit `coolrmm-agent.conf` — set `server_url` and `api_key`
 3. Run `coolrmm-agent.exe`
 
 ### Wishlist (future features, no timeline)
