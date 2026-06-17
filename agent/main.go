@@ -14,7 +14,7 @@ import (
 )
 
 // version tracks the current release of the agent binary.
-const version = "v0.8.0"
+const version = "v0.9.0"
 
 // check_in_interval is how often the agent phones home.
 const check_in_interval = 60 * time.Second
@@ -31,20 +31,20 @@ func main() {
         fmt.Printf("Phoning home to %s every %s.\n", cfg.ServerURL, check_in_interval)
 
         // Send the first check-in immediately — don't wait for the first tick.
-        do_checkin(cfg.ServerURL)
+        do_checkin(cfg.ServerURL, cfg.ApiKey)
 
         // Start the ticker and check in on every tick.
         ticker := time.NewTicker(check_in_interval)
         defer ticker.Stop()
 
         for range ticker.C {
-                do_checkin(cfg.ServerURL)
+                do_checkin(cfg.ServerURL, cfg.ApiKey)
         }
 }
 
 // do_checkin calls send_checkin and logs the result either way.
-func do_checkin(server_url string) {
-        if err := send_checkin(server_url); err != nil {
+func do_checkin(server_url, api_key string) {
+        if err := send_checkin(server_url, api_key); err != nil {
                 // Log the failure but keep running — a missed check-in isn't fatal.
                 log.Printf("check-in failed: %v", err)
                 return

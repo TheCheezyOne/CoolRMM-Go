@@ -106,16 +106,11 @@ These rules govern all development on this project. The agent must follow them a
 ## Repository & Environment
 
 - **GitHub URL:** https://github.com/TheCheezyOne/CoolRMM-Go
-- **Local path:** `/home/cheez/Public/CoolRMM/CoolRMM-Go/`
+- **Local path:** `C:\Projects\CoolRMM-Go\`
 - **Auth method:** SSH (ED25519 key already configured)
-- **Dev environment:** Linux (Replit at home, Linux at home)
-- **Work environment:** Windows 11 (continuing development on-site)
+- **Dev environment:** Windows 11 Pro (work device — primary dev machine)
+- **Replit:** used for editing and storage only
 - **Target deployment:** Windows 11 x64
-
-### Cross-Platform Rules
-- Always use Go's `filepath` package for paths — never hardcode `/` or `\`
-- Cross-compile with `GOOS=windows GOARCH=amd64`
-- Flag any code that cannot be tested on Linux
 
 ### Git Sync Note
 Replit's sandbox blocks all `.git/config` modifications — remotes cannot be added programmatically.
@@ -149,6 +144,7 @@ If you edit `replit.md` locally and push, paste the relevant section into chat a
 - Web dashboard live — dark theme, device list with status dots, cpu%, auto-refresh ✓ `061626@1101`
 - Multi-device confirmed — two endpoints reporting live to dashboard simultaneously ✓ `061626@1151`
 - RAM % and Disk (C:) % confirmed live on dashboard — both endpoints reporting ✓ `061626@1203`
+- Uptime confirmed live on dashboard — both endpoints reporting (9h 57m / 6d 4h) ✓ `061626@1318`
 
 ### Version Log
 
@@ -162,6 +158,7 @@ If you edit `replit.md` locally and push, paste the relevant section into chat a
 - agent v0.6.0: CPU usage % added to payload via gopsutil (500ms sample, combined across all cores)
 - agent v0.7.0: RAM usage % and disk usage % (C:\) added to payload
 - agent v0.8.0: Uptime (seconds since last boot) added to payload
+- agent v0.9.0: Shared secret auth — api_key added to config and sent as Bearer token on every check-in
 
 **Server**
 - server v0.0.0: (no standalone scaffold — server started at first feature)
@@ -171,3 +168,4 @@ If you edit `replit.md` locally and push, paste the relevant section into chat a
 - server v0.4.0: Web dashboard — GET / serves dark theme HTML page, GET /devices returns device JSON; status dots green/yellow/red by check-in age
 - server v0.5.0: RAM and Disk (C:\) columns added to dashboard and database
 - server v0.6.0: Uptime column added to dashboard and database
+- server v0.7.0: Shared secret auth — require_auth() middleware protects /checkin; server reads api_key from coolrmm-server.conf

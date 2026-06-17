@@ -5,3 +5,7 @@
 # server_url — the full address of your CoolRMM server.
 # Replace with your server's actual IP address and port.
 server_url=http://192.168.1.100:8080
+
+# api_key — shared secret between the agent and server.
+# Must match the api_key in coolrmm-server.conf on the server machine.
+api_key=your_secret_here

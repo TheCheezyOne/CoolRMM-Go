@@ -1,8 +1,8 @@
 /*
         agent/config.go — Loads agent configuration from a file on disk.
         Reads coolrmm.conf from the same directory as the running binary.
-        The config file must contain exactly one key: server_url.
-        Fails loudly if the file is missing or the key is not set.
+        Required keys: server_url, api_key.
+        Fails loudly if the file is missing or either key is not set.
 */
 
 package main
@@ -18,6 +18,7 @@ import (
 // agent_config holds all runtime configuration for the agent.
 type agent_config struct {
         ServerURL string
+        ApiKey    string
 }
 
 // load_config locates coolrmm.conf next to the binary and parses it.
@@ -62,9 +63,12 @@ func parse_config_file(conf_path string) (agent_config, error) {
                 key := strings.TrimSpace(parts[0])
                 val := strings.TrimSpace(parts[1])
 
-                // Only one key supported right now.
-                if key == "server_url" {
+                // Store recognized keys.
+                switch key {
+                case "server_url":
                         cfg.ServerURL = val
+                case "api_key":
+                        cfg.ApiKey = val
                 }
         }
 
@@ -72,9 +76,12 @@ func parse_config_file(conf_path string) (agent_config, error) {
                 return agent_config{}, fmt.Errorf("error reading config file: %w", err)
         }
 
-        // server_url is required — fail hard if it wasn't found.
+        // Both keys are required — fail hard if either is missing.
         if cfg.ServerURL == "" {
                 return agent_config{}, fmt.Errorf("server_url is missing from %s", conf_path)
+        }
+        if cfg.ApiKey == "" {
+                return agent_config{}, fmt.Errorf("api_key is missing from %s", conf_path)
         }
 
         return cfg, nil
@@ -94,6 +101,7 @@ func parse_config_file(conf_path string) (agent_config, error) {
         coolrmm.conf format (# for comments):
           # CoolRMM agent config
           server_url=http://192.168.1.100:8080
+          api_key=your_secret_here
 
         To run tests:
           go test ./agent/...
