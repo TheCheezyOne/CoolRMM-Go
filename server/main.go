@@ -12,7 +12,7 @@ import (
 )
 
 // version tracks the current release of the server binary.
-const version = "v0.6.0"
+const version = "v0.7.0"
 
 // listen_addr is the address and port the server binds to.
 const listen_addr = ":8080"
@@ -23,6 +23,13 @@ const db_path = "coolrmm.db"
 func main() {
         fmt.Printf("CoolRMM Server %s starting on %s...\n", version, listen_addr)
 
+        // Load the server config — fail hard if it's missing or incomplete.
+        cfg, err := load_server_config()
+        if err != nil {
+                log.Fatalf("failed to load server config: %v", err)
+        }
+        fmt.Printf("Auth: api_key loaded.\n")
+
         // Open (or create) the database — fail hard if it can't be opened.
         db, err := open_db(db_path)
         if err != nil {
@@ -32,10 +39,12 @@ func main() {
 
         fmt.Printf("Database ready: %s\n", db_path)
 
-        // Register all routes with the DB wired in where needed.
+        // Dashboard and device list are read-only — no auth required yet.
         http.HandleFunc("/", make_dashboard_handler())
-        http.HandleFunc("/checkin", make_checkin_handler(db))
         http.HandleFunc("/devices", make_devices_handler(db))
+
+        // Agent-facing endpoints are protected by the shared api_key.
+        http.HandleFunc("/checkin", require_auth(cfg.ApiKey, make_checkin_handler(db)))
 
         // Start the server — log.Fatal so any startup error prints and exits cleanly.
         log.Fatal(http.ListenAndServe(listen_addr, nil))
